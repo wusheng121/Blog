@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}个人中心{% endblock %}
+{% block content %}
+
+<h2>个人中心</h2>
+
+<p><strong>用户名：</strong>{{ user['username'] }}</p>
+<p><strong>权限：</strong>{{ '管理员' if user['is_admin'] else '用户' }}</p>
+<hr>
+    <h3>我的文章</h3>
+<ul>
+    {% for post in posts %}
+        <li><a href="{{ url_for('post', post_id=post['id']) }}">{{ post['title'] }}</a> - {{ post['created'] }}</li>
+    {% else %}
+        <p>你还没有发布过任何文章哦~</p>
+    {% endfor %}
+</ul>
+
+    <hr>
+    <h3>我的评论</h3>
+<ul>
+    {% for comment in comments %}
+        <li>在《<a href="{{ url_for('post', post_id=comment['post_id']) }}">{{ comment['title'] }}</a>》中评论：“{{ comment['content'] }}” - {{ comment['created'] }}</li>
+    {% else %}
+        <p>你还没有评论过任何文章哦~</p>
+    {% endfor %}
+</ul>
+
+    <hr>
+    <h3>我的点赞</h3>
+<ul>
+    {% for like in likes %}
+        <li><a href="{{ url_for('post', post_id=like['post_id']) }}">{{ like['title'] }}</a></li>
+    {% else %}
+        <p>你还没有点赞过任何文章哦~</p>
+    {% endfor %}
+</ul>
+
+{% endblock %}

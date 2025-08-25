@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/bootstrap.min.css') }}">
+    <title>{% block title %} {% endblock %}</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('index')}}">kanaa的博客</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- 左侧菜单 -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('new') }}">发布文章</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('about') }}">关于kanaa</a>
+            </li>
+
+
+            {% if session.get('username') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('personal') }}">个人中心</a>
+            </li>
+            {% endif %}
+            {% if session.get('is_admin') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin') }}">后台管理</a>
+            </li>
+            {% endif %}
+        </ul>
+
+        <!-- 右侧菜单 -->
+        <ul class="navbar-nav ml-auto">
+            {% if session['username'] %}
+                <li class="nav-item">
+                    <span class="navbar-text">欢迎，{{ session['username'] }}</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">退出</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">登录</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('register') }}">注册</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    </nav>
+
+{#    {% with messages = get_flashed_messages() %}#}
+{#    {% if messages %}#}
+{#      <div id="flash-message" class="alert alert-info alert-dismissible fade show" role="alert">#}
+{#        {{ messages[0] }}#}
+{#      </div>#}
+{#    {% endif %}#}
+{#    {% endwith %}#}
+
+    <div class="container">
+{#        {% for message in get_flashed_messages() %}#}
+{#        <div class="alert alert-danger">{{ message }}</div>#}
+{#        {% endfor %}#}
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div id="flash-message" class="alert alert-info alert-dismissible fade show" role="alert">
+        {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %} {% endblock %}
+    </div>
+
+
+    <script src="{{url_for('static', filename='js/jquery.slim.min.js')}}" ></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}" ></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}" ></script>
+    <script>
+    window.onload = function() {
+      const flash = document.getElementById('flash-message');
+      if (flash) {
+        setTimeout(() => {
+          flash.style.display = 'none';
+        }, 3000);
+      }
+    };
+  </script>
+
+   </body>
+</html>
