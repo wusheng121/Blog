@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}私信{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>我的私信</h2>
+    <hr>
+    {% for contact in contacts %}
+    <div class="card mb-3">
+        <div class="card-body d-flex align-items-center">
+            <img src="{{ url_for('static', filename='uploads/' + contact['avatar']) if contact['avatar'] else url_for('static', filename='default_avatar.svg') }}"
+                 alt="头像"
+                 class="rounded-circle me-3"
+                 style="width:50px; height:50px; object-fit:cover;">
+            <div class="flex-grow-1">
+                <h5 class="card-title mb-1">{{ contact['username'] }}</h5>
+                <p class="card-text text-muted mb-1">{{ contact['last_message'] }}</p>
+                <small class="text-muted">{{ contact['last_time'] }}</small>
+            </div>
+            <a href="{{ url_for('send_message', user_id=contact['id']) }}" class="btn btn-primary">聊天</a>
+        </div>
+    </div>
+    {% else %}
+    <p>暂无私信</p>
+    {% endfor %}
+</div>
+{% endblock %}

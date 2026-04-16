@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}{{ post['title'] }}{% endblock %}
+{% block content %}
+
+<div class="container mt-4 mb-5">
+
+  <!-- 作者信息区域 -->
+  <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+    <div class="d-flex align-items-center">
+      <img src="{{ url_for('static', filename='uploads/' + author['avatar']) if author and author['avatar'] else url_for('static', filename='default_avatar.svg') }}"
+           alt="头像"
+           class="rounded-circle me-2"
+           style="width:48px; height:48px; object-fit:cover;">
+      <div>
+        <h5 class="mb-0">{{ author['username'] if author else '未知用户' }}</h5>
+{#        <small class="text-muted">作者 ID: {{ author['id'] }}</small>#}
+      </div>
+    </div>
+
+    {% if author and session.get('user_id') and session.get('user_id') != author['id'] %}
+      <form method="POST" action="{{ url_for('unfollow' if followed else 'follow', user_id=author['id']) }}">
+        <button class="btn btn-sm {{ 'btn-outline-danger' if followed else 'btn-outline-primary' }}">
+          {{ '取消关注' if followed else '关注' }}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  <!-- 文章内容区域 -->
+  <div class="mb-4">
+    <h2 class="fw-bold mb-3">{{ post['title'] }}</h2>
+    <p class="fs-5" style="white-space: pre-wrap;">{{ post['content']|safe }}</p>
+    {% if tags %}
+    <div class="mt-2">
+      {% for tag in tags %}
+      <span class="badge badge-secondary">{{ tag['name'] }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 发布时间与发布地址 -->
+  <div class="text-muted small mb-4">
+    发布于：{{ post['created'] }}
+    {% if post['location'] %}
+      · 地点：{{ post['location'] }}
+    {% endif %}
+  </div>
+
+  <!-- 管理员/作者操作 -->
+  {% if session.get('user_id') == post['author_id'] or session.get('is_admin') %}
+  <div class="d-flex gap-2 mb-4">
+    <a href="{{ url_for('edit', post_id=post['id']) }}" class="btn btn-warning btn-sm">编辑</a>
+    <form action="{{ url_for('delete', post_id=post['id']) }}" method="POST" class="d-inline">
+      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除这篇文章吗？')">删除</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- 评论区 -->
+  <hr>
+  <h5 class="mb-3">💬 评论区</h5>
+
+  {% for comment in comments %}
+  <div class="border rounded p-2 mb-2">
+    <div class="d-flex align-items-start">
+      <img src="{{ url_for('static', filename='uploads/' + comment['avatar']) if comment['avatar'] else url_for('static', filename='default_avatar.svg') }}"
+           alt="头像"
+           class="rounded-circle me-2"
+           style="width:32px; height:32px; object-fit:cover;">
+      <div class="flex-grow-1">
+        <strong>{{ comment['username'] }}</strong>：
+        {{ comment['content']|safe }}<br>
+        {% if comment['image'] %}
+        <img src="{{ url_for('static', filename='uploads/' + comment['image']) }}" alt="评论图片" class="img-fluid mt-2" style="max-width: 200px;">
+        {% endif %}
+        <div class="mt-1">
+          <small class="text-muted">{{ comment['created'] }}</small>
+          <form method="POST" action="{{ url_for('like_comment', comment_id=comment['id']) }}" class="d-inline">
+            <button type="submit" class="btn btn-link btn-sm p-0">👍 {{ comment['like_count'] }}</button>
+          </form>
+          <span class="ms-2">回复: {{ comment['reply_count'] }}</span>
+          <button class="btn btn-link btn-sm p-0" onclick="showReplyForm({{ comment['id'] }})">回复</button>
+        </div>
+        <div id="reply-form-{{ comment['id'] }}" class="mt-2" style="display: none;">
+          <form method="POST" action="{{ url_for('post', post_id=post['id']) }}" enctype="multipart/form-data">
+            <input type="hidden" name="parent_id" value="{{ comment['id'] }}">
+            <textarea name="content" class="form-control" rows="2" placeholder="回复..."></textarea>
+            <input type="file" name="image" accept="image/*" class="form-control mt-1">
+            <button type="submit" class="btn btn-sm btn-primary mt-1">回复</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% for reply in comment['replies'] %}
+    <div class="ml-4 pl-4 border-left border-primary bg-light mt-2 d-flex align-items-start">
+      <img src="{{ url_for('static', filename='uploads/' + reply['avatar']) if reply['avatar'] else url_for('static', filename='default_avatar.svg') }}"
+           alt="头像"
+           class="rounded-circle me-2"
+           style="width:24px; height:24px; object-fit:cover;">
+      <div class="flex-grow-1">
+        <strong>{{ reply['username'] }}</strong>：
+        {{ reply['content']|safe }}<br>
+        {% if reply['image'] %}
+        <img src="{{ url_for('static', filename='uploads/' + reply['image']) }}" alt="回复图片" class="img-fluid mt-1" style="max-width: 150px;">
+        {% endif %}
+        <div class="mt-1">
+          <small class="text-muted">{{ reply['created'] }}</small>
+          <form method="POST" action="{{ url_for('like_comment', comment_id=reply['id']) }}" class="d-inline">
+            <button type="submit" class="btn btn-link btn-sm p-0">👍 {{ reply['like_count'] }}</button>
+          </form>
+          <span class="ms-2">回复: {{ reply['reply_count'] }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">还没有评论，快来抢沙发吧~</p>
+  {% endfor %}
+
+</div>
+
+<!-- 固定底部评论输入区 -->
+<div class="fixed-bottom bg-white border-top shadow-sm py-2 px-3">
+  <div class="container d-flex align-items-center justify-content-between">
+
+    <!-- 评论输入框与发送按钮 -->
+    <form method="POST"
+          action="{{ url_for('post', post_id=post['id']) }}"
+          enctype="multipart/form-data"
+          class="d-flex align-items-center flex-grow-1 me-3">
+      <textarea name="content"
+                class="form-control me-2"
+                rows="1"
+                placeholder="天青色等烟雨，评论区在等你"
+                style="resize:none; min-height: 40px;"></textarea>
+      <input type="file" name="image" accept="image/*" class="form-control me-2" style="max-width: 150px;">
+      <button type="submit"
+              class="btn btn-primary px-3 py-2"
+              style="white-space: nowrap;">
+        发送
+      </button>
+    </form>
+
+    <!-- 点赞 / 收藏 / 转发 操作按钮 -->
+    <div class="d-flex align-items-center gap-3">
+
+      <!-- ❤️ 点赞按钮（独立 form） -->
+      <form method="POST" action="{{ url_for('like', post_id=post['id']) }}" class="m-0 p-0">
+        <button type="submit" class="btn btn-link text-danger p-0 border-0" style="text-decoration:none;">
+          ❤️ <span class="ms-1">{{ like_count }}</span>
+        </button>
+      </form>
+
+      <!-- ⭐ 收藏按钮 -->
+      <form method="POST" action="{{ url_for('favorite', post_id=post['id']) }}" class="m-0 p-0">
+        <button type="submit" class="btn btn-link text-warning p-0 border-0" style="text-decoration:none;">
+          ⭐ <span class="ms-1">{{ favorite_count }}</span>
+        </button>
+      </form>
+
+      <!-- 🔁 转发按钮 -->
+      <form method="POST" action="{{ url_for('repost', post_id=post['id']) }}" class="m-0 p-0">
+        <button type="submit" class="btn btn-link text-secondary p-0 border-0" style="text-decoration:none;">
+          🔁 <span class="ms-1">{{ repost_count }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    window.onload = function() {
+      const flash = document.getElementById('flash-message');
+      if (flash) {
+        setTimeout(() => {
+          flash.style.display = 'none';
+        }, 3000);
+      }
+    };
+
+    function showReplyForm(commentId) {
+      const form = document.getElementById('reply-form-' + commentId);
+      if (form.style.display === 'none') {
+        form.style.display = 'block';
+      } else {
+        form.style.display = 'none';
+      }
+    }
+  </script>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %}上传头像{% endblock %}</h1>
+
+<form method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="file">选择头像文件</label>
+        <input type="file" name="file" class="form-control-file" accept="image/*" required>
+    </div>
+    <button type="submit" class="btn btn-primary">上传</button>
+</form>
+
+{% endblock %}

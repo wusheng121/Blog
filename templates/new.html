@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %}新建文章{% endblock %}</h1>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="title">标题</label>
+        <input type="text" name="title" placeholder="标题" class="form-control"
+               value="{{ request.form['title'] }}">
+    </div>
+
+    <div class="form-group">
+        <label for="content">内容</label>
+        <textarea name="content" placeholder="文章内容" class="form-control" id="content">{{ request.form['content'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="image">插入图片</label>
+        <input type="file" name="image" accept="image/*" class="form-control" id="image">
+        <button type="button" class="btn btn-secondary mt-1" onclick="insertImage()">插入图片</button>
+    </div>
+
+    <div class="form-group">
+        <label for="tags">标签（用逗号分隔）</label>
+        <input type="text" name="tags" placeholder="标签，如：技术,生活" class="form-control"
+               value="{{ request.form['tags'] }}">
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn_primary">提交</button>
+    </div>
+</form>
+
+<script>
+function insertImage() {
+    const fileInput = document.getElementById('image');
+    const contentTextarea = document.getElementById('content');
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgTag = '<img src="' + e.target.result + '" alt="图片" style="max-width: 100%;">';
+            contentTextarea.value += imgTag;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+
+{% endblock %}

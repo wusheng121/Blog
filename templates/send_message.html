@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}与 {{ user['username'] }} 的私信{% endblock %}
+{% block content %}
+<div class="container mt-4 mb-4">
+    <div class="row g-3">
+        <div class="col-md-4 col-lg-3">
+            <div class="card" style="height: 70vh;">
+                <div class="card-header">最近联系人</div>
+                <div class="list-group list-group-flush overflow-auto">
+                    {% for contact in contacts %}
+                    <a href="{{ url_for('send_message', user_id=contact['id']) }}"
+                       class="list-group-item list-group-item-action {% if contact['id'] == user['id'] %}active{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div>{{ contact['username'] }}</div>
+                                <small class="{% if contact['id'] == user['id'] %}text-white-50{% else %}text-muted{% endif %}">
+                                    {{ contact['last_message'] or '暂无消息' }}
+                                </small>
+                            </div>
+                        </div>
+                    </a>
+                    {% else %}
+                    <div class="list-group-item text-muted">暂无联系人</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 col-lg-9">
+            <div class="card" style="height: 70vh;">
+                <div class="card-header">与 {{ user['username'] }} 的私信</div>
+                <div id="chatContainer" class="card-body overflow-auto" style="background: #f8f9fa;">
+                    {% for message in messages %}
+                    <div class="d-flex mb-2 {% if message['sender_id'] == session.get('user_id') %}justify-content-end{% else %}justify-content-start{% endif %}">
+                        <div class="px-3 py-2 rounded" style="max-width: 75%; {% if message['sender_id'] == session.get('user_id') %}background:#0d6efd;color:#fff;{% else %}background:#fff;border:1px solid #dee2e6;{% endif %}">
+                            <div>{{ message['content'] }}</div>
+                            <small class="d-block mt-1 {% if message['sender_id'] == session.get('user_id') %}text-white-50{% else %}text-muted{% endif %}">{{ message['created'] }}</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">还没有私信，发一条开始聊天吧。</p>
+                    {% endfor %}
+                </div>
+
+                <div class="card-footer">
+                    <form method="POST">
+                        <label for="chat-content" class="sr-only">私信内容</label>
+                        <div class="input-group">
+                            <textarea id="chat-content" class="form-control" name="content" rows="2" placeholder="输入私信内容..." required></textarea>
+                            <button type="submit" class="btn btn-primary">发送</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  (function() {
+    const container = document.getElementById('chatContainer');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  })();
+</script>
+{% endblock %}

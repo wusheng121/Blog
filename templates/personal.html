@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}个人中心{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">个人中心</h2>
+
+  <div class="card p-3 mb-4 shadow-sm">
+    <h4>👤 用户信息</h4>
+    <div class="d-flex align-items-center mb-3">
+      <img src="{{ url_for('static', filename='uploads/' + user['avatar']) if user['avatar'] else url_for('static', filename='default_avatar.svg') }}"
+           alt="头像"
+           class="rounded-circle me-3"
+           style="width:80px; height:80px; object-fit:cover;">
+      <div>
+        <p><strong>用户名：</strong>{{ user['username'] }}</p>
+        {% if user['is_admin'] %}
+        <p><strong>权限：</strong><span class="badge bg-danger">管理员</span></p>
+        {% endif %}
+      </div>
+    </div>
+    <a href="{{ url_for('change_password') }}" class="btn btn-outline-primary btn-sm">修改密码</a>
+    <a href="{{ url_for('upload_avatar') }}" class="btn btn-outline-secondary btn-sm">上传头像</a>
+  </div>
+
+  <hr>
+<h3>我的关注</h3>
+<ul>
+    {% for f in followings %}
+    <li>
+        <a href="{{ url_for('view_user', user_id=f['id']) }}">{{ f['username'] }}</a>
+        <form action="{{ url_for('unfollow', user_id=f['id']) }}" method="POST" style="display:inline;">
+            <button class="btn btn-sm btn-outline-danger">取消关注</button>
+        </form>
+    </li>
+    {% else %}
+    <p class="text-mutes=d">你还没有关注任何人</p>
+    {% endfor %}
+</ul>
+
+<ur>
+    <h3>我的粉丝</h3>
+    <ul>
+        {% for f in followers %}
+        <li><a href="{{ url_for('view_user', user_id=f['id']) }}">{{ f['username'] }}</a></li>
+        {% else %}
+        <p class="text-muted">还没有人关注你哦</p>
+        {% endfor %}
+    </ul>
+</ur>
+
+  <div class="card p-3 mb-4 shadow-sm">
+    <h4>📝 我的文章</h4>
+    {% if posts %}
+      <ul class="list-group list-group-flush">
+        {% for post in posts %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('post', post_id=post['id']) }}">{{ post['title'] }}</a>
+            <small class="text-muted">{{ post['created'] }}</small>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">你还没有发布过任何文章哦~</p>
+    {% endif %}
+  </div>
+
+  <div class="card p-3 mb-4 shadow-sm">
+    <h4>💬 我的评论</h4>
+    {% if comments %}
+      <ul class="list-group list-group-flush">
+        {% for c in comments %}
+          <li class="list-group-item">
+            在《<a href="{{ url_for('post', post_id=c['post_id']) }}">{{ c['title'] }}</a>》中评论：“{{ c['content'] }}”
+            <br><small class="text-muted">{{ c['created'] }}</small>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">你还没有评论过任何文章哦~</p>
+    {% endif %}
+  </div>
+
+  <div class="card p-3 mb-4 shadow-sm">
+    <h4>❤️ 我的点赞</h4>
+    {% if likes %}
+      <ul class="list-group list-group-flush">
+        {% for like in likes %}
+          <li class="list-group-item">
+            <a href="{{ url_for('post', post_id=like['post_id']) }}">{{ like['title'] }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">你还没有点赞过任何文章哦~</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

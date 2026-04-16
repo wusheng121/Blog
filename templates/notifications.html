@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %}消息通知{% endblock %}</h1>
+
+{% for notification in notifications %}
+<div class="alert {{ 'alert-info' if notification['is_read'] else 'alert-success' }} mb-2">
+    <strong>{{ notification['message'] }}</strong><br>
+    <small class="text-muted">{{ notification['created'] }}</small>
+</div>
+{% else %}
+<p class="text-muted">暂无通知</p>
+{% endfor %}
+
+{% endblock %}

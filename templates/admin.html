@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}后台管理{% endblock %}
+{% block content %}
+
+<h4>用户列表</h4>
+<ul>
+    {% for user in users %}
+    <li>{{ user['username'] }}{% if user['is_admin'] %} (管理员){% endif %}
+        <a href="{{ url_for('delete_user', user_id=user['id']) }}">[删除]</a>
+    </li>
+    {% endfor %}
+</ul>
+
+<h4>文章列表</h4>
+<ul>
+    {% for post in posts %}
+    <li>{{ post['title'] }}
+        <form action="{{ url_for('delete', post_id=post['id']) }}" method="POST" style="display:inline">
+            <button type = "submit" onclick="return confirm('确定要删除吗？');" class="btn btn-link">[删除]</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+
+{#<form action="{{ url_for('delete', post_id=post['id']) }}" method="POST">#}
+{#        <input type = "submit" value="删除文章" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除吗？')">#}
+{#    </form>#}

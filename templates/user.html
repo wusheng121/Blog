@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ user['username'] }}的主页{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ user['username'] }}的主页</h2>
+
+    {% if session.get('user_id') and session.get('user_id') != user['id'] %}
+        <form method="POST" action="{{ url_for('unfollow' if followed else 'follow', user_id=user['id']) }}">
+            <button class="btn {{ 'btn-outline-danger' if followed else 'btn-outline-primary' }}">
+                {{ '取消关注' if followed else '关注' }}
+            </button>
+        </form>
+        <a href="{{ url_for('send_message', user_id=user['id']) }}" class="btn btn-outline-info">发送私信</a>
+    {% endif %}
+
+    <hr>
+    <h4>投稿</h4>
+    <ul>
+        {% for post in posts %}
+        <li><a href="{{ url_for('post', post_id=post['id']) }}">{{ post['title'] }}</a></li>
+        {% else %}
+        <p>该用户还没有过投稿</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
